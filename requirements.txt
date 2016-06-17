@@ -1,0 +1,1 @@
+-e git://github.com/jcfr/vcspull.git@improve-svn-and-git-support#egg=Package
