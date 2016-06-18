@@ -64,8 +64,6 @@ if __name__ == '__main__':
                         help="Regular expression to select particular extensions (e.g 'ABC|Slicer.+')")
     parser.add_argument("--delete", action="store_true",
                         help="Delete previous source checkout.")
-    parser.add_argument("--force", action="store_true",
-                        help="Always attempt to checkout or update source code")
     parser.add_argument("/path/to/ExtensionsSource")
     parser.add_argument("/path/to/ExtensionsIndex")
     args = parser.parse_args()
@@ -98,14 +96,9 @@ if __name__ == '__main__':
                     del stats[extension_name]
                     write_dict(stats_file, stats)
                 shutil.rmtree(extension_source_dir)
+        elapsed_time_collected = False
         if extension_name in stats:
-            msg = "Already checkout"
-            if not args.force:
-                logger.warning(msg, extra=log_context)
-                continue
-            else:
-                logger.warning(msg + ": Attempting to checkout/update anyway because '--force' was provided",
-                               extra=log_context)
+            elapsed_time_collected = True
         url = metadata["scm"] + '+' + metadata["scmurl"] + "@" + metadata["scmrevision"]
         kwargs = {}
         for param_name in ['username', 'password']:
@@ -114,6 +107,7 @@ if __name__ == '__main__':
         repo = create_repo(url=url, parent_dir=extensions_source_dir, name=extension_name, **kwargs)
         duration, result = timecall(repo.update_repo)()
         repo.info("Elapsed time: {:.2f}s\n".format(duration))
-        stats[extension_name] = duration
+        if not elapsed_time_collected:
+            stats[extension_name] = duration
 
         write_dict(stats_file, stats)
