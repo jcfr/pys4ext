@@ -64,8 +64,8 @@ if __name__ == '__main__':
                         help="Regular expression to select particular extensions (e.g 'ABC|Slicer.+')")
     parser.add_argument("--delete", action="store_true",
                         help="Delete previous source checkout.")
-    parser.add_argument("/path/to/ExtensionsSource")
     parser.add_argument("/path/to/ExtensionsIndex")
+    parser.add_argument("/path/to/ExtensionsSource")
     args = parser.parse_args()
 
     extensions_source_dir = os.path.abspath(os.path.expanduser(getattr(args, "/path/to/ExtensionsSource")))

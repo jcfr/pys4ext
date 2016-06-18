@@ -14,6 +14,6 @@ git clone git://github.com/jcfr/ps4ext.git
 mkvirtualenv pys4ext
 cd pys4ext
 pip install -r requirements.txt
-./extensions-index-checkout.py ../ExtensionsSource ../ExtensionsIndex
+./extensions-index-checkout.py ../ExtensionsIndex ../ExtensionsSource
 ```
 
