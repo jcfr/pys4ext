@@ -9,8 +9,8 @@ import re
 import shutil
 import time
 
-from vcspull.log import RepoLogFormatter
-from vcspull.repo import create_repo
+from libvcs.log import RepoLogFormatter
+from libvcs.shortcuts import create_repo_from_pip_url as create_repo
 
 logger = logging.getLogger(__name__)
 
