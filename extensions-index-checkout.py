@@ -9,8 +9,8 @@ import re
 import shutil
 import time
 
-from vcspull.log import RepoLogFormatter
-from vcspull.repo import create_repo
+from libvcs.log import RepoLogFormatter
+from libvcs.shortcuts import create_repo_from_pip_url as create_repo
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +104,7 @@ if __name__ == '__main__':
         for param_name in ['username', 'password']:
             if 'svn' + param_name in metadata:
                 kwargs['svn_' + param_name] = metadata['svn' + param_name]
-        repo = create_repo(url=url, parent_dir=extensions_source_dir, name=extension_name, **kwargs)
+        repo = create_repo(url, parent_dir=extensions_source_dir, name=extension_name, **kwargs)
         duration, result = timecall(repo.update_repo)()
         repo.info("Elapsed time: {:.2f}s\n".format(duration))
         if not elapsed_time_collected:
