@@ -9,7 +9,7 @@ import re
 import shutil
 import time
 
-from vcspull.repo import create_repo
+from libvcs.shortcuts import create_repo
 
 log = logging.getLogger(__name__)
 
@@ -137,7 +137,12 @@ if __name__ == '__main__':
         for param_name in ['username', 'password']:
             if 'svn' + param_name in metadata:
                 kwargs['svn_' + param_name] = metadata['svn' + param_name]
-        repo = create_repo(url=url, parent_dir=extensions_source_dir, name=extension_name, **kwargs)
+        repo = create_repo(
+            url=metadata['scmurl'],
+            vcs=metadata['scm'],
+            rev=metadata['scmrevision'],
+            repo_dir=os.path.join(extensions_source_dir, extension_name),
+            **kwargs)
         repo.info("Begin timed call")
         duration, result = timecall(repo.update_repo)()
         repo.info("Elapsed time: {:.2f}s\n".format(duration))
