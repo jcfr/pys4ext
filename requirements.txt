@@ -1,1 +1,1 @@
-libvcs
+libvcs>=0.1.6  # updated from == 0.1.6
