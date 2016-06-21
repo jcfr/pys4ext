@@ -13,11 +13,15 @@ from vcspull.repo import create_repo
 
 log = logging.getLogger(__name__)
 
+
 def setup_logger(log=None, level='INFO'):
     """Setup logging for CLI use.
 
     :param log: instance of logger
     :type log: :py:class:`Logger`
+
+    :param level: log level 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'
+    :type level: :class:`str`
 
     """
     if not log:
@@ -78,11 +82,15 @@ def write_dict(json_file, data):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Checkout and update Slicer extension sources.')
-    parser.add_argument("--filter",  default=".*", type=str,
-                        help="Regular expression to select particular extensions (e.g 'ABC|Slicer.+')")
-    parser.add_argument("--delete", action="store_true",
-                        help="Delete previous source checkout.")
+    parser = argparse.ArgumentParser(
+        description='Checkout and update Slicer extension sources.')
+    parser.add_argument(
+        "--filter",
+        default=".*", type=str,
+        help="Regular expression to select particular extensions (e.g 'ABC|Slicer.+')")
+    parser.add_argument(
+        "--delete", action="store_true",
+        help="Delete previous source checkout.")
     parser.add_argument(
         '--log-level', dest='log_level',
         default='INFO',
@@ -112,7 +120,7 @@ if __name__ == '__main__':
         if not re_file_match.match(extension_name):
             continue
         metadata = parse_s4ext(filepath)
-        log_context = {'repo_name' : extension_name, 'repo_vcs': metadata['scm']}
+        log_context = {'repo_name': extension_name, 'repo_vcs': metadata['scm']}
         if args.delete:
             extension_source_dir = os.path.join(extensions_source_dir, extension_name)
             if os.path.exists(extension_source_dir):
