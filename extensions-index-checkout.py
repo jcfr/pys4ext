@@ -29,8 +29,13 @@ def setup_logger(log=None, level='INFO'):
         log.addHandler(channel)
 
         # vcslib-level logging
+        repo_channel = logging.StreamHandler()
+        repo_formatter = logging.Formatter(
+            '[%(repo_name)s] (%(repo_vcs)s) %(levelname)1.1s: %(message)s'
+        )
+        repo_channel.setFormatter(repo_formatter)
         vcslogger = logging.getLogger('libvcs')
-        vcslogger.addHandler(channel)
+        vcslogger.addHandler(repo_channel)
         vcslogger.setLevel(level)
 
 
