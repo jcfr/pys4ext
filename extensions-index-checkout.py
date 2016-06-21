@@ -9,16 +9,24 @@ import re
 import shutil
 import time
 
-from libvcs.log import RepoLogFormatter
-from libvcs.shortcuts import create_repo_from_pip_url as create_repo
+from libvcs.shortcuts import create_repo
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
-logger.propagate = False
-channel = logging.StreamHandler()
-channel.setFormatter(RepoLogFormatter())
-logger.setLevel('INFO')
-logger.addHandler(channel)
+def setup_logger(log=None, level='INFO'):
+    """Setup logging for CLI use.
+
+    :param log: instance of logger
+    :type log: :py:class:`Logger`
+
+    """
+    if not log:
+        log = logging.getLogger()
+    if not log.handlers:
+        channel = logging.StreamHandler()
+        log.setLevel(level)
+        log.addHandler(channel)
+
 
 def timecall(method):
     """Wrap ``method`` and return its execution time.
@@ -58,12 +66,17 @@ def write_dict(json_file, data):
 
 
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser(description='Checkout and update Slicer extension sources.')
     parser.add_argument("--filter",  default=".*", type=str,
                         help="Regular expression to select particular extensions (e.g 'ABC|Slicer.+')")
     parser.add_argument("--delete", action="store_true",
                         help="Delete previous source checkout.")
+    parser.add_argument(
+        '--log-level', dest='log_level',
+        default=None,
+        help='Level of debug verbosity. DEBUG, INFO, WARNING, ERROR, CRITICAL.',
+    )
+
     parser.add_argument("/path/to/ExtensionsIndex")
     parser.add_argument("/path/to/ExtensionsSource")
     args = parser.parse_args()
@@ -71,10 +84,13 @@ if __name__ == '__main__':
     extensions_source_dir = os.path.abspath(os.path.expanduser(getattr(args, "/path/to/ExtensionsSource")))
     extensions_index_dir = os.path.abspath(os.path.expanduser(getattr(args, "/path/to/ExtensionsIndex")))
 
-    log_context = {'repo_name' : 'None', 'repo_vcs': 'None'}
+    setup_logger(
+        log=log,
+        level=args.log_level.upper() if 'log_level' in args else 'INFO'
+	)
 
-    logger.info("extensions_source_dir is [%s]" % extensions_source_dir, extra=log_context)
-    logger.info("extensions_index_dir is [%s]" % extensions_index_dir, extra=log_context)
+    log.info("extensions_source_dir is [%s]" % extensions_source_dir)
+    log.info("extensions_index_dir is [%s]" % extensions_index_dir)
 
     file_match = "*.s4ext"
 
@@ -91,7 +107,7 @@ if __name__ == '__main__':
         if args.delete:
             extension_source_dir = os.path.join(extensions_source_dir, extension_name)
             if os.path.exists(extension_source_dir):
-                logger.warning("Deleting %s" % extension_source_dir, extra=log_context)
+                log.warning("Deleting %s" % extension_source_dir, extra=log_context)
                 if extension_name in stats:
                     del stats[extension_name]
                     write_dict(stats_file, stats)
@@ -104,7 +120,8 @@ if __name__ == '__main__':
         for param_name in ['username', 'password']:
             if 'svn' + param_name in metadata:
                 kwargs['svn_' + param_name] = metadata['svn' + param_name]
-        repo = create_repo(url, parent_dir=extensions_source_dir, name=extension_name, **kwargs)
+        repo = create_repo(url=metadata['scmurl'], vcs=metadata['scm'], rev=metadata['scmrevision'], repo_dir=os.path.join(extensions_source_dir, extension_name), **kwargs)
+        repo.info("Begin timed call")
         duration, result = timecall(repo.update_repo)()
         repo.info("Elapsed time: {:.2f}s\n".format(duration))
         if not elapsed_time_collected:

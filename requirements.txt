@@ -1,1 +1,1 @@
-libvcs
+libvcs==0.1.5
