@@ -23,9 +23,15 @@ def setup_logger(log=None, level='INFO'):
     if not log:
         log = logging.getLogger()
     if not log.handlers:
+        # pys4ext config
         channel = logging.StreamHandler()
         log.setLevel(level)
         log.addHandler(channel)
+
+        # vcslib-level logging
+        vcslogger = logging.getLogger('libvcs')
+        vcslogger.addHandler(channel)
+        vcslogger.setLevel(level)
 
 
 def timecall(method):
@@ -73,7 +79,7 @@ if __name__ == '__main__':
                         help="Delete previous source checkout.")
     parser.add_argument(
         '--log-level', dest='log_level',
-        default=None,
+        default='INFO',
         help='Level of debug verbosity. DEBUG, INFO, WARNING, ERROR, CRITICAL.',
     )
 
@@ -84,10 +90,7 @@ if __name__ == '__main__':
     extensions_source_dir = os.path.abspath(os.path.expanduser(getattr(args, "/path/to/ExtensionsSource")))
     extensions_index_dir = os.path.abspath(os.path.expanduser(getattr(args, "/path/to/ExtensionsIndex")))
 
-    setup_logger(
-        log=log,
-        level=args.log_level.upper() if 'log_level' in args else 'INFO'
-	)
+    setup_logger(log=log, level=args.log_level.upper())
 
     log.info("extensions_source_dir is [%s]" % extensions_source_dir)
     log.info("extensions_index_dir is [%s]" % extensions_index_dir)
