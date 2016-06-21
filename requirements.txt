@@ -1,1 +1,1 @@
-libvcs==0.1.5
+libvcs==0.1.6  # updated from 0.1.5
