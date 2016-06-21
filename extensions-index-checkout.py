@@ -35,6 +35,7 @@ def setup_logger(log=None, level='INFO'):
         )
         repo_channel.setFormatter(repo_formatter)
         vcslogger = logging.getLogger('libvcs')
+        vcslogger.propagate = False
         vcslogger.addHandler(repo_channel)
         vcslogger.setLevel(level)
 
