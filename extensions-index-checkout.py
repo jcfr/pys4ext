@@ -7,6 +7,7 @@ import logging
 import os
 import re
 import shutil
+import sys
 import time
 
 from libvcs.shortcuts import create_repo
@@ -80,6 +81,9 @@ def write_dict(json_file, data):
     with open(json_file, 'w') as file:
         file.write(json.dumps(data, indent=4))
 
+def progress_callback(output, timestamp):
+    sys.stdout.write(output)
+    sys.stdout.flush()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -143,6 +147,7 @@ if __name__ == '__main__':
             rev=metadata['scmrevision'],
             repo_dir=os.path.join(extensions_source_dir, extension_name),
             **kwargs)
+        repo.progress_callback = progress_callback
         repo.info("Begin timed call")
         duration, result = timecall(repo.update_repo)()
         repo.info("Elapsed time: {:.2f}s\n".format(duration))
