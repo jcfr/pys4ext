@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 
 """
-Download and manage Slicer extensions sources.
+Download and update Slicer extensions source checkouts.
 
-This executable module allows to download and manage sources
-associated with Slicer extension description files.
+This python CLI allows to download and update sources
+checkouts corresponding to a list of Slicer extension
+description files.
+
+It also keep track of the initial checkout time for each extension.
+Time are stored in file named `ExtensionsCheckoutTimes.json` located
+in the checkouts top-level directory.
 """
 
 from __future__ import unicode_literals, print_function, absolute_import
