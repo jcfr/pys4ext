@@ -1,0 +1,9 @@
+[flake8]
+max-line-length: 80
+# Whether to display the pep8 instructions on failure (can be quite verbose)
+show-pep8: True
+# Whether to show source code for each failure
+show-source: True
+# Maximum cyclomatic complexity allowed
+max-complexity: 12
+format: pylint

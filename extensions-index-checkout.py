@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 
+"""
+Download and manage Slicer extensions sources.
+
+This executable module allows to download and manage sources
+associated with Slicer extension description files.
+"""
+
+from __future__ import unicode_literals, print_function, absolute_import
 import argparse
 import glob
 import json
@@ -15,25 +23,24 @@ from libvcs.shortcuts import create_repo
 log = logging.getLogger(__name__)
 
 
-def setup_logger(log=None, level='INFO'):
+def setup_logger(logger=None, level='INFO'):
     """Setup logging for CLI use.
 
-    :param log: instance of logger
-    :type log: :py:class:`Logger`
+    :param logger: instance of logger
+    :type logger: :py:class:`Logger`
 
-    :param level: log level 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'
+    :param level: logger level 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'
     :type level: :class:`str`
-
     """
-    if not log:
-        log = logging.getLogger()
-    if not log.handlers:
+    if not logger:
+        logger = logging.getLogger()
+    if not logger.handlers:
         # pys4ext config
         channel = logging.StreamHandler()
-        log.setLevel(level)
-        log.addHandler(channel)
+        logger.setLevel(level)
+        logger.addHandler(channel)
 
-        # vcslib-level logging
+        # libvcs-level logging
         repo_channel = logging.StreamHandler()
         repo_formatter = logging.Formatter(
             '[%(repo_name)s] (%(repo_vcs)s) %(levelname)1.1s: %(message)s'
@@ -45,45 +52,53 @@ def setup_logger(log=None, level='INFO'):
         vcslogger.setLevel(level)
 
 
-def timecall(method):
-    """Wrap ``method`` and return its execution time.
-    """
-
-    def wrapper(*args, **kwargs):
+def time_call(method):
+    """Decorate ``method`` so that it returns its execution time."""
+    def wrapper(*wrapper_args, **wrapper_kwargs):
         start = time.time()
-        result = method(*args, **kwargs)
-        duration = time.time() - start
-        return duration, result
+        call_result = method(*wrapper_args, **wrapper_kwargs)
+        call_duration = time.time() - start
+        return call_duration, call_result
     return wrapper
 
 
-def parse_s4ext(filepath):
-    metadata = {}
-    with open(filepath) as file:
-        for line in file:
+def parse_s4ext(ext_file_path):
+    """Parse a Slicer extension description file.
+
+    :param ext_file_path: Path to a Slicer extension description file.
+    :return: Dictionnary of extension metadata.
+    """
+    ext_metadata = {}
+    with open(ext_file_path) as ext_file:
+        for line in ext_file:
             if not line.strip() or line.startswith("#"):
                 continue
             fields = [field.strip() for field in line.split(' ', 1)]
             assert(len(fields) <= 2)
-            metadata[fields[0]] = fields[1] if len(fields) == 2 else None
-    return metadata
+            ext_metadata[fields[0]] = fields[1] if len(fields) == 2 else None
+    return ext_metadata
 
 
-def read_dict(json_file):
+def read_dict(json_file_path):
+    """Parse a json file and return corresponding dictionary."""
     data = {}
-    if os.path.exists(json_file):
-        with open(json_file) as file:
-            data = json.load(file)
+    if os.path.exists(json_file_path):
+        with open(json_file_path) as json_file:
+            data = json.load(json_file)
     return data
 
 
-def write_dict(json_file, data):
-    with open(json_file, 'w') as file:
-        file.write(json.dumps(data, indent=4))
+def write_dict(json_file_path, data):
+    """Write dictionary to json file."""
+    with open(json_file_path, 'w') as json_file:
+        json_file.write(json.dumps(data, indent=4))
+
 
 def progress_callback(output, timestamp):
+    """Write ``output`` to ``sys.stdout``."""
     sys.stdout.write(output)
     sys.stdout.flush()
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -91,7 +106,8 @@ if __name__ == '__main__':
     parser.add_argument(
         "--filter",
         default=".*", type=str,
-        help="Regular expression to select particular extensions (e.g 'ABC|Slicer.+')")
+        help="Regular expression to select particular \
+        extensions (e.g 'ABC|Slicer.+')")
     parser.add_argument(
         "--delete", action="store_true",
         help="Delete previous source checkout.")
@@ -105,38 +121,45 @@ if __name__ == '__main__':
     parser.add_argument("/path/to/ExtensionsSource")
     args = parser.parse_args()
 
-    extensions_source_dir = os.path.abspath(os.path.expanduser(getattr(args, "/path/to/ExtensionsSource")))
-    extensions_index_dir = os.path.abspath(os.path.expanduser(getattr(args, "/path/to/ExtensionsIndex")))
+    def get_path_arg(arg_key):
+        """Read command line argument ``arg_key`` as an absolute path."""
+        return os.path.abspath(os.path.expanduser(getattr(args, arg_key)))
+    extensions_source_dir = get_path_arg("/path/to/ExtensionsSource")
+    extensions_index_dir = get_path_arg("/path/to/ExtensionsIndex")
 
-    setup_logger(log=log, level=args.log_level.upper())
+    setup_logger(logger=log, level=args.log_level.upper())
 
     log.info("extensions_source_dir is [%s]" % extensions_source_dir)
     log.info("extensions_index_dir is [%s]" % extensions_index_dir)
 
     file_match = "*.s4ext"
 
-    stats_file = os.path.join(extensions_source_dir, "ExtensionsCheckoutTimes.json")
-    stats = read_dict(stats_file)
+    stats_file_name = "ExtensionsCheckoutTimes.json"
+
+    stats_file_path = os.path.join(extensions_source_dir, stats_file_name)
+    stats = read_dict(stats_file_path)
 
     re_file_match = re.compile(args.filter)
-    for filepath in glob.glob(os.path.join(extensions_index_dir, file_match)):
-        extension_name = os.path.splitext(os.path.basename(filepath))[0]
+    for file_path in glob.glob(os.path.join(extensions_index_dir, file_match)):
+        extension_name = os.path.splitext(os.path.basename(file_path))[0]
         if not re_file_match.match(extension_name):
             continue
-        metadata = parse_s4ext(filepath)
+        metadata = parse_s4ext(file_path)
         log_context = {'repo_name': extension_name, 'repo_vcs': metadata['scm']}
         if args.delete:
-            extension_source_dir = os.path.join(extensions_source_dir, extension_name)
+            extension_source_dir = \
+                os.path.join(extensions_source_dir, extension_name)
             if os.path.exists(extension_source_dir):
-                log.warning("Deleting %s" % extension_source_dir, extra=log_context)
+                log.warning("Deleting %s" % extension_source_dir,
+                            extra=log_context)
                 if extension_name in stats:
                     del stats[extension_name]
-                    write_dict(stats_file, stats)
+                    write_dict(stats_file_path, stats)
                 shutil.rmtree(extension_source_dir)
         elapsed_time_collected = False
         if extension_name in stats:
             elapsed_time_collected = True
-        url = metadata["scm"] + '+' + metadata["scmurl"] + "@" + metadata["scmrevision"]
+        url = "{scm}+{scmurl}@{scmrevision}".format(**metadata)
         kwargs = {}
         for param_name in ['username', 'password']:
             if 'svn' + param_name in metadata:
@@ -149,9 +172,9 @@ if __name__ == '__main__':
             **kwargs)
         repo.progress_callback = progress_callback
         repo.info("Begin timed call")
-        duration, result = timecall(repo.update_repo)()
+        duration, result = time_call(repo.update_repo)()
         repo.info("Elapsed time: {:.2f}s\n".format(duration))
         if not elapsed_time_collected:
             stats[extension_name] = duration
 
-        write_dict(stats_file, stats)
+        write_dict(stats_file_path, stats)
