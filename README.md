@@ -3,7 +3,7 @@ pys4ext
 
 A collection of command-line tools to manage extension sources
 
-* [extensions-source-checkout.py](extensions-source-checkout.py): Download and update extension source checkouts
+* [extensions-index-checkout.py](extensions-index-checkout.py): Download and update extension source checkouts
 associated with extension description files.
 
 
