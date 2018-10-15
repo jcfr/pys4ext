@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 
 
 def setup_logger(logger=None, level='INFO'):
-    """Setup logging for CLI use.
+    """Install logger for CLI use.
 
     :param logger: instance of logger
     :type logger: :py:class:`Logger`
@@ -109,6 +109,7 @@ def progress_callback(output, timestamp):
 
 
 def main():
+    """Execute command-line tool."""
     parser = argparse.ArgumentParser(
         description='Checkout and update Slicer extension sources.')
     parser.add_argument(
@@ -167,7 +168,6 @@ def main():
         elapsed_time_collected = False
         if extension_name in stats:
             elapsed_time_collected = True
-        url = "{scm}+{scmurl}@{scmrevision}".format(**metadata)
         kwargs = {}
         for param_name in ['username', 'password']:
             if 'svn' + param_name in metadata:
@@ -186,6 +186,7 @@ def main():
             stats[extension_name] = duration
 
         write_dict(stats_file_path, stats)
+
 
 if __name__ == '__main__':
     main()
