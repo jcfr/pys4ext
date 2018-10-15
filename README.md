@@ -3,7 +3,7 @@ pys4ext
 
 A collection of command-line tools to manage extension sources
 
-* [extensions-index-checkout.py](extensions-index-checkout.py): Download and update extension source checkouts
+* [slicer_extensions_index_checkout.py](slicer_extensions_index_checkout.py): Download and update extension source checkouts
 associated with extension description files.
 
 
@@ -23,7 +23,7 @@ git clone git://github.com/jcfr/ps4ext.git
 mkvirtualenv pys4ext
 cd pys4ext
 pip install -r requirements.txt
-./extensions-index-checkout.py ../ExtensionsIndex ../ExtensionsSource
+./slicer_extensions_index_checkout.py ../ExtensionsIndex ../ExtensionsSource
 ```
 
 Glossary

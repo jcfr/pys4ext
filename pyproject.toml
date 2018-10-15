@@ -1,0 +1,16 @@
+[build-system]
+requires = ["flit"]
+build-backend = "flit.buildapi"
+
+[tool.flit.metadata]
+module = "slicer_extensions_index_checkout"
+author = "Jean-Christophe Fillion-Robin"
+author-email = "jchris.fillionr@kitware.com"
+home-page = "https://github.com/jcfr/pys4ext#readme"
+requires=[
+    "libvcs",
+]
+description-file="README.md"
+
+[tool.flit.scripts]
+slicer_extensions_index_checkout = "slicer_extensions_index_checkout:main"

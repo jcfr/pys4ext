@@ -13,6 +13,7 @@ in the checkouts top-level directory.
 """
 
 from __future__ import unicode_literals, print_function, absolute_import
+
 import argparse
 import glob
 import json
@@ -24,6 +25,8 @@ import sys
 import time
 
 from libvcs.shortcuts import create_repo
+
+__version__ = '1.0'
 
 log = logging.getLogger(__name__)
 
@@ -105,7 +108,7 @@ def progress_callback(output, timestamp):
     sys.stdout.flush()
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(
         description='Checkout and update Slicer extension sources.')
     parser.add_argument(
@@ -183,3 +186,6 @@ if __name__ == '__main__':
             stats[extension_name] = duration
 
         write_dict(stats_file_path, stats)
+
+if __name__ == '__main__':
+    main()
